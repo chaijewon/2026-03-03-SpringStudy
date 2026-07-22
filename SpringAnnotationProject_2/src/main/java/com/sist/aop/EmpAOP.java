@@ -1,11 +1,18 @@
 package com.sist.aop;
 
+import java.util.List;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
+
+import com.sist.vo.DeptVO;
+import com.sist.vo.EmpVO;
 
 // 공통으로 사용되는 클래스 
 @Aspect
@@ -79,5 +86,39 @@ public class EmpAOP {
 	   long end=System.currentTimeMillis();
 	   System.out.println("걸린 시간:"+(end-start)+"MS");
 	   return obj;
+   }
+   @AfterReturning(value = "execution(* com.sist.service.EmpServiceImpl.*(..))",
+		   returning = "obj")
+   public void afterReturn(Object obj)
+   {
+	   if(obj instanceof List)
+	   {
+		  List<?> list=(List<?>)obj; // Object ? => 알 수 경우 
+		  for(Object item:list)
+		  {
+			  if(item instanceof EmpVO)
+			  {
+				  EmpVO vo=(EmpVO)item;
+				  System.out.println(vo.getEmpno()+" "
+						  +vo.getEname()+" "
+						  +vo.getJob()+" "
+						  +vo.getDbday());
+			  }
+			  if(item instanceof DeptVO)
+			  {
+				  DeptVO vo=(DeptVO)item;
+				  System.out.println(vo.getDeptno()+" "
+						  +vo.getDname()+" "
+						  +vo.getLoc());
+			  }
+		  }
+	   }
+	  
+   }
+   @AfterThrowing(value = "execution(* com.sist.service.EmpServiceImpl.*(..))"
+		         ,throwing = "ex")
+   public void AfterThrowing(Throwable ex)
+   {
+	   ex.printStackTrace();
    }
 }
